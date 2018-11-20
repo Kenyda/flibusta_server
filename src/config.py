@@ -1,0 +1,14 @@
+SERVER_HOST = "0.0.0.0"
+SERVER_PORT = "7771"
+
+DB_NAME = ""
+DB_HOST = ""
+DB_USER = ""
+DB_PASSWORD = ""
+
+TEMP_DB_NAME = ""
+TEMP_DB_HOST = ""
+TEMP_DB_USER = ""
+TEMP_PASSWORD = ""
+
+TOR_PROXIES = "http://localhost:8118"
