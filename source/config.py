@@ -4,22 +4,22 @@ import fire
 class Config:
     DEBUG = False
 
-    SERVER_HOST = ""
-    SERVER_PORT = -1
+    SERVER_HOST: str
+    SERVER_PORT: int
 
-    DB_NAME = ""
-    DB_HOST = ""
-    DB_USER = ""
-    DB_PASSWORD = ""
+    DB_NAME: str
+    DB_HOST: str
+    DB_USER: str
+    DB_PASSWORD: str
 
-    TEMP_DB_NAME = ""
-    TEMP_DB_HOST = ""
-    TEMP_DB_USER = ""
-    TEMP_DB_PASSWORD = ""
+    TEMP_DB_NAME: str
+    TEMP_DB_HOST: str
+    TEMP_DB_USER: str
+    TEMP_DB_PASSWORD: str
 
-    DSN = f""
+    DSN: str
 
-    TOR_PROXIES = "http://localhost:8118"
+    TOR_PROXIES: str
 
     def __init__(self, db_password: str, temp_db_password: str,
                  db_name: str = "flibusta", db_host: str = "localhost",
@@ -47,4 +47,3 @@ class Config:
 
 
 fire.Fire(Config)
-
