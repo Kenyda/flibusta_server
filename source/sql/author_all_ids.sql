@@ -1,0 +1,1 @@
+SELECT array_agg(author.id) FROM author

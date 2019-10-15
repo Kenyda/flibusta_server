@@ -1,0 +1,1 @@
+DELETE FROM bookauthor WHERE author_id = ANY ($1::int[])

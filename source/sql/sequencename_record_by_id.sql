@@ -1,0 +1,1 @@
+SELECT seq_id, name FROM seqname WHERE seq_id = $1

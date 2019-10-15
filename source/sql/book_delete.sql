@@ -1,0 +1,1 @@
+DELETE FROM book WHERE book.id = ANY($1::int[])
