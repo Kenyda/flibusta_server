@@ -39,6 +39,7 @@ class Requests:
     author_search_count = open(SQL_FOLDER / "author_search_count.sql").read()
     author_search = open(SQL_FOLDER / "author_search.sql").read()
     author_random_id = open(SQL_FOLDER / "author_random_id.sql").read()
+    author_info_by_id = open(SQL_FOLDER / "author_info_by_id.sql").read()
 
     sequencename_by_id_count = open(SQL_FOLDER / "sequencename_by_id_count.sql").read()
     sequencename_by_id = open(SQL_FOLDER / "sequencename_by_id.sql").read()
@@ -96,6 +97,7 @@ async def create_tables(pool: asyncpg.pool.Pool):
     await create_sequence_table(pool)
     await create_book_annotation_table(pool)
     await create_author_annotation_table(pool)
+
 
 async def update_indexes(pool: asyncpg.pool.Pool):
     async with pool.acquire() as conn:  # type: asyncpg.Connection
