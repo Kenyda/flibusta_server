@@ -108,21 +108,6 @@ async def update_indexes(pool: asyncpg.pool.Pool):
         await conn.execute(Requests.update_indexes)
 
 
-async def get_short_name(author) -> str:
-    temp = ''
-    if author['last_name']:
-        temp += author['last_name']
-    if author['first_name']:
-        if temp:
-            temp += " "
-        temp += author['first_name'][0]
-    if author['middle_name']:
-        if temp:
-            temp += " "
-        temp += author['middle_name'][0]
-    return temp
-
-
 class ConfigurableDB(ABC):
     pool: asyncpg.pool.Pool
 
