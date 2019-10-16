@@ -12,6 +12,7 @@ from aioify import aioify
 
 from aiohttp.web_response import json_response
 
+from config import Config
 from db import *
 from exceptions import *
 
@@ -50,7 +51,7 @@ async def download(book_id: int, file_type: str, type_:int=3, retry:int=3):
                 raise Exception()
 
             if type_ == 0:
-                proxy="http://185.93.108.227:8118"
+                proxy = Config.TOR_PROXIES
 
             if file_type in ("fb2", "epub", "mobi"):
                 url = basic_url + f"/b/{book_id}/{file_type}"
@@ -60,21 +61,10 @@ async def download(book_id: int, file_type: str, type_:int=3, retry:int=3):
             if type_ in [1]:
                 cookies = {'SESS717db4750c98b34dc0a0cf14a0c49e88': 'dfd17c8195cecd84a6fc02392729bfc5'}
 
-            # if type_ in [1, 2] and file_type in ("fb2", "epub", "mobi"):
-            #     setup_format_url = basic_url + f"/AJAX.php?op=setuseropt&o=D&v={file_type}"
-
         elif type_ == 3:
             url = f"https://flibs.in/d?b={book_id}&f={file_type}"
 
-        print(url)
-
         try:
-            # if setup_format_url:
-            #     print("start setup")
-            #     async with aiohttp.ClientSession(cookies=cookies, timeout=ClientTimeout(total=60 * 60)) as session:
-            #         async with session.get(setup_format_url, allow_redirects=True, max_redirects=50, proxy=proxy) as resp:  # type: aiohttp.ClientResponse
-            #             print(f"setup {resp.status}")
-
             async with aiohttp.ClientSession(cookies=cookies, timeout=ClientTimeout(total=60 * 60)) as session:
                 async with session.get(url, allow_redirects=True, max_redirects=50, proxy=proxy) as resp:  # type: aiohttp.ClientResponse
                     if resp.headers.get("Content-Type") and "text/html" in resp.headers.get("Content-Type") or resp.status != 200:
@@ -168,7 +158,7 @@ class BookHandler:
 
     @staticmethod
     async def download(request: web.Request):
-        # ToDO: try download from telegram if book exist in channel
+        # ToDO: try download from telegram if book exists in channel
         book_id = request.match_info.get("id", None)
         file_type = request.match_info.get("type", None)
         if book_id is None and file_type is None:
@@ -331,7 +321,6 @@ if __name__ == "__main__":
 
     if platform.system() == "Linux":
         try:
-            # noinspection PyUnresolvedReferences
             import uvloop
 
             asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -340,7 +329,6 @@ if __name__ == "__main__":
             print("Install uvloop for best speed!")
 
     app = web.Application()
-    # update.app = app
 
     app.on_startup.append(preapare_db)
 
