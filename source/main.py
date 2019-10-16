@@ -13,14 +13,7 @@ from aioify import aioify
 from aiohttp.web_response import json_response
 
 from db import *
-
-
-class NotBookException(Exception):
-    pass
-
-
-class CaptchaException(Exception):
-    pass
+from exceptions import *
 
 
 process_pool_executor = concurrent.futures.ProcessPoolExecutor(10)
