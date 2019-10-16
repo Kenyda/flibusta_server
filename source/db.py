@@ -142,12 +142,6 @@ async def get_short_name(author) -> str:
 
 class BooksDB:
     @staticmethod
-    async def all_ids(pool: asyncpg.pool.Pool):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            result = await conn.fetch(Requests.book_all_ids)
-            return [] if result[0]["array_agg"] is None else result[0]["array_agg"]
-
-    @staticmethod
     async def by_id(pool: asyncpg.pool.Pool, book_id: int):
         async with pool.acquire() as conn:  # type: asyncpg.Connection
             result = await conn.fetch(Requests.book_by_id, book_id)
@@ -165,25 +159,6 @@ class BooksDB:
             return "{" + f'"result": {result}, "count": {count}' + "}"
 
     @staticmethod
-    async def update(pool: asyncpg.pool.Pool, id_, title, lang, file_type):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.book_update, title, lang, file_type, id_)
-
-    @staticmethod
-    async def create(pool: asyncpg.pool.Pool, id_: int, title: str, lang: str, file_type: str):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.book_create, id_, title, lang, file_type)
-
-    @staticmethod
-    async def delete(pool: asyncpg.pool.Pool, ids: List[int]):
-        if not ids:
-            return
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await BookAuthor.delete_by_book(pool, ids)
-            await Sequence.delete_by_book(pool, ids)
-            await conn.execute(Requests.book_delete, ids)
-
-    @staticmethod
     async def random(pool: asyncpg.pool.Pool, allowed_langs: List[str]):
         async with pool.acquire() as conn:
             result = await conn.fetch(Requests.book_random, allowed_langs)
@@ -191,12 +166,6 @@ class BooksDB:
 
 
 class AuthorsBD:
-    @staticmethod
-    async def all_ids(pool: asyncpg.pool.Pool):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            result = (await conn.fetch(Requests.author_all_ids))
-            return result[0]["array_agg"] if result[0] else []
-
     @staticmethod
     async def by_id(pool: asyncpg.pool.Pool, author_id: int, allowed_langs: List[str], limit: int, page: int):
         async with pool.acquire() as conn:  # type: asyncpg.Connection
@@ -219,65 +188,13 @@ class AuthorsBD:
             return "{" + f'"result": {result}, "count": {count}' + "}"
 
     @staticmethod
-    async def update(pool: asyncpg.pool.Pool, id_, first_name, middle_name, last_name):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.author_update,
-                               first_name, middle_name, last_name, id_,
-                               " ".join([first_name, middle_name, last_name], ))
-
-    @staticmethod
-    async def create(pool: asyncpg.pool.Pool, id_: int, first_name: str, middle_name: str, last_name: str):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.author_create, id_, first_name, middle_name, last_name,
-                               " ".join([first_name, middle_name, last_name]))
-
-    @staticmethod
-    async def delete(pool: asyncpg.pool.Pool, ids: List[int]):
-        if not ids:
-            return
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await BookAuthor.delete_by_author(pool, ids)
-            await conn.execute(Requests.author_delete, ids)
-
-    @staticmethod
     async def random(pool: asyncpg.pool.Pool, allowed_langs: List[str]):
         async with pool.acquire() as conn:
             author_id = (await conn.fetch(Requests.author_random_id, allowed_langs))[0]["id"]
             return (await conn.fetch(Requests.author_info_by_id, author_id))[0]["json_build_object"]
 
 
-class BookAuthor:
-    @staticmethod
-    async def create(pool: asyncpg.pool.Pool, book_id: int, author_id):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.bookauthor_create, book_id, author_id)
-
-    @staticmethod
-    async def delete(pool: asyncpg.pool.Pool, book_id: int, author_id: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.bookauthor_delete, book_id, author_id)
-
-    @staticmethod
-    async def delete_by_author(pool: asyncpg.pool.Pool, author_ids: List[int]):
-        if not author_ids:
-            return
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.bookauthor_delete_by_author, author_ids)
-
-    @staticmethod
-    async def delete_by_book(pool: asyncpg.pool.Pool, book_ids: List[int]):
-        if not book_ids:
-            return
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.bookauthor_delete_by_book, book_ids)
-
-
 class SequenceName:
-    @staticmethod
-    async def all_ids(pool: asyncpg.pool.Pool):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            return (await conn.fetch(Requests.sequencename_all_ids))[0]["array_agg"]
-
     @staticmethod
     async def by_id(pool: asyncpg.pool.Pool, allowed_langs, seq_id: int, limit: int, page: int):
         async with pool.acquire() as conn:  # type: asyncpg.Connection
@@ -299,30 +216,6 @@ class SequenceName:
             return "{" + f'"result": {result}, "count": {count}' + "}"
 
     @staticmethod
-    async def record_by_id(pool: asyncpg.pool.Pool, seq_id: int) -> Optional[Record]:
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            result = await conn.fetch(Requests.sequencename_record_by_id, seq_id)
-            return result[0] if result else None
-
-    @staticmethod
-    async def create(pool: asyncpg.pool.Pool, seq_id: int, name: str):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.sequencename_create, seq_id, name)
-
-    @staticmethod
-    async def update(pool: asyncpg.pool.Pool, seq_id: int, name: str):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.sequencename_update, seq_id, name)
-
-    @staticmethod
-    async def delete_by_id(pool: asyncpg.pool.Pool, seq_ids: List[int]):
-        if not seq_ids:
-            return
-        async with pool.acquire() as conn:
-            await Sequence.delete_by_sequence(pool, seq_ids)
-            await conn.execute(Requests.sequencename_delete_by_id, seq_ids)
-
-    @staticmethod
     async def random(pool: asyncpg.pool.Pool, allowed_langs: List[str]):
         async with pool.acquire() as conn:
             return (await conn.fetch(Requests.sequencename_random, allowed_langs))[0]["json_build_object"]
@@ -334,30 +227,6 @@ class Sequence:
         async with pool.acquire() as conn:  # type: asyncpg.Connection
             result = (await conn.fetch(Requests.sequence_by_book_id, book_id))[0]
             return result["array_agg"] if result["array_agg"] else []
-
-    @staticmethod
-    async def create(pool: asyncpg.pool.Pool, book_id: int, seq_id: int, num: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.sequence_create, book_id, seq_id, num)
-
-    @staticmethod
-    async def delete(pool: asyncpg.pool.Pool, book_id: int, seq_id: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.sequence_delete, book_id, seq_id)
-
-    @staticmethod
-    async def delete_by_sequence(pool: asyncpg.pool.Pool, seq_ids: List[int]):
-        if not seq_ids:
-            return
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.sequence_delete_by_sequence, seq_ids)
-
-    @staticmethod
-    async def delete_by_book(pool: asyncpg.pool.Pool, book_ids: List[int]):
-        if not book_ids:
-            return
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(Requests.sequence_delete_by_book, book_ids)
 
 
 class BookAnnotations:
