@@ -1,1 +1,0 @@
-DELETE FROM seq WHERE book_id = ANY ($1::int[])

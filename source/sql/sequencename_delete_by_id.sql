@@ -1,1 +1,0 @@
-DELETE FROM seqname WHERE seq_id = ANY ($1::int[])

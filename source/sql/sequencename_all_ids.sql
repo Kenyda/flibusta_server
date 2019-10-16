@@ -1,1 +1,0 @@
-SELECT array_agg(seqname.seq_id) FROM seqname
