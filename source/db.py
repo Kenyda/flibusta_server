@@ -25,51 +25,28 @@ class Requests:
     create_sequence_name_table = open(SQL_FOLDER / "create_sequence_name_table.sql").read().format(config.DB_USER)
     create_sequence_table = open(SQL_FOLDER / "create_sequence_table.sql").read().format(config.DB_USER)
     create_book_annotation_table = open(SQL_FOLDER / "create_book_annotation_table.sql").read().format(config.DB_USER)
-    create_author_annotation_table = open(SQL_FOLDER / "create_author_annotation_table.sql").read().format(config.DB_USER) # ToDO
+    create_author_annotation_table = open(SQL_FOLDER / "create_author_annotation_table.sql").read().format(config.DB_USER)
 
     update_indexes = open(SQL_FOLDER / "update_indexes.sql").read()
 
-    book_all_ids = open(SQL_FOLDER / "book_all_ids.sql").read()
     book_by_id = open(SQL_FOLDER / "book_by_id.sql").read()
     book_search_count = open(SQL_FOLDER / "book_search_count.sql").read()
     book_search = open(SQL_FOLDER / "book_search.sql").read()
-    book_update = open(SQL_FOLDER / "book_update.sql").read()
-    book_create = open(SQL_FOLDER / "book_create.sql").read()
-    book_delete = open(SQL_FOLDER / "book_delete.sql").read()
     book_random = open(SQL_FOLDER / "book_random.sql").read()
 
-    author_all_ids = open(SQL_FOLDER / "author_all_ids.sql").read()
     author_by_id = open(SQL_FOLDER / "author_by_id.sql").read()
-    author_info_by_id = open(SQL_FOLDER / "author_info_by_id.sql").read()
     author_by_id_count = open(SQL_FOLDER / "author_by_id_count.sql").read()
     author_search_count = open(SQL_FOLDER / "author_search_count.sql").read()
     author_search = open(SQL_FOLDER / "author_search.sql").read()
-    author_update = open(SQL_FOLDER / "author_update.sql").read()
-    author_create = open(SQL_FOLDER / "author_create.sql").read()
-    author_delete = open(SQL_FOLDER / "author_delete.sql").read()
     author_random_id = open(SQL_FOLDER / "author_random_id.sql").read()
 
-    bookauthor_create = open(SQL_FOLDER / "bookauthor_create.sql").read()
-    bookauthor_delete = open(SQL_FOLDER / "bookauthor_delete.sql").read()
-    bookauthor_delete_by_author = open(SQL_FOLDER / "bookauthor_delete_by_author.sql").read()
-    bookauthor_delete_by_book = open(SQL_FOLDER / "bookauthor_delete_by_book.sql").read()
-
-    sequencename_all_ids = open(SQL_FOLDER / "sequencename_all_ids.sql").read()
     sequencename_by_id_count = open(SQL_FOLDER / "sequencename_by_id_count.sql").read()
     sequencename_by_id = open(SQL_FOLDER / "sequencename_by_id.sql").read()
     sequencename_search_count = open(SQL_FOLDER / "sequencename_search_count.sql").read()
     sequencename_search = open(SQL_FOLDER / "sequencename_search.sql").read()
-    sequencename_record_by_id = open(SQL_FOLDER / "sequencename_record_by_id.sql").read()
-    sequencename_create = open(SQL_FOLDER / "sequencename_create.sql").read()
-    sequencename_update = open(SQL_FOLDER / "sequencename_update.sql").read()
-    sequencename_delete_by_id = open(SQL_FOLDER / "sequencename_delete_by_id.sql").read()
     sequencename_random = open(SQL_FOLDER / "sequencename_random.sql").read()
 
     sequence_by_book_id = open(SQL_FOLDER / "sequence_by_book_id.sql").read()
-    sequence_create = open(SQL_FOLDER / "sequence_create.sql").read()
-    sequence_delete = open(SQL_FOLDER / "sequence_delete.sql").read()
-    sequence_delete_by_sequence = open(SQL_FOLDER / "sequence_delete_by_sequence.sql").read()
-    sequence_delete_by_book = open(SQL_FOLDER / "sequence_delete_by_book.sql").read()
 
     book_annotations_by_id = open(SQL_FOLDER / "book_annotation_by_id.sql").read()
 
