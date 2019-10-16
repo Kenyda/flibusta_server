@@ -1,6 +1,7 @@
-from typing import List, Optional
-
+from typing import List, Optional, Type
 import pathlib
+from abc import abstractclassmethod, ABC
+
 import asyncpg
 from aiohttp import web
 from asyncpg import Record
@@ -8,11 +9,14 @@ from asyncpg import Record
 from config import Config as config
 
 
-async def create_pool(app: web.Application):
-    app["pool"] = await asyncpg.create_pool(user=config.DB_USER, password=config.DB_PASSWORD,
-                                            database=config.DB_NAME, host=config.DB_HOST)
+async def preapare_db(app: web.Application):
+    pool = await asyncpg.create_pool(user=config.DB_USER, password=config.DB_PASSWORD,
+                                     database=config.DB_NAME, host=config.DB_HOST)
 
-    await create_tables(app["pool"])
+    await create_tables(pool)
+
+    for _class in [AuthorAnnotations, AuthorsBD, BookAnnotations, BooksDB, Sequence, SequenceName]:  # type: Type[ConfigurableDB]
+        _class.configurate(pool)
 
 
 SQL_FOLDER = pathlib.Path("./sql")
@@ -119,17 +123,24 @@ async def get_short_name(author) -> str:
     return temp
 
 
-class BooksDB:
-    @staticmethod
-    async def by_id(pool: asyncpg.pool.Pool, book_id: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
+class ConfigurableDB(ABC):
+    pool: asyncpg.pool.Pool
+
+    @classmethod
+    def configurate(cls, pool: asyncpg.pool.Pool):
+        cls.pool = pool
+
+
+class BooksDB(ConfigurableDB):
+    @classmethod
+    async def by_id(cls, book_id: int):
+        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
             result = await conn.fetch(Requests.book_by_id, book_id)
             return result[0]["json_build_object"] if result else None
 
-    @staticmethod
-    async def search(pool: asyncpg.pool.Pool, query: str, allowed_langs: List[str],
-                     limit: int, page: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
+    @classmethod
+    async def search(cls, query: str, allowed_langs: List[str], limit: int, page: int):
+        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
             count = (await conn.fetch(Requests.book_search_count, allowed_langs, query))[0]["count"]
             if count == 0:
                 return None
@@ -137,17 +148,17 @@ class BooksDB:
                                        allowed_langs, query, limit, limit * (page - 1)))[0]["array_to_json"]
             return "{" + f'"result": {result}, "count": {count}' + "}"
 
-    @staticmethod
-    async def random(pool: asyncpg.pool.Pool, allowed_langs: List[str]):
-        async with pool.acquire() as conn:
+    @classmethod
+    async def random(cls, allowed_langs: List[str]):
+        async with cls.pool.acquire() as conn:
             result = await conn.fetch(Requests.book_random, allowed_langs)
             return result[0]["json_build_object"] if result else None
 
 
-class AuthorsBD:
-    @staticmethod
-    async def by_id(pool: asyncpg.pool.Pool, author_id: int, allowed_langs: List[str], limit: int, page: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
+class AuthorsBD(ConfigurableDB):
+    @classmethod
+    async def by_id(cls, author_id: int, allowed_langs: List[str], limit: int, page: int):
+        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
             count = (await conn.fetch(Requests.author_by_id_count, author_id, allowed_langs))[0]["count"]
             if count == 0:
                 return None
@@ -155,10 +166,9 @@ class AuthorsBD:
                                        limit, limit * (page - 1)))[0]["json_build_object"]
             return "{" + f'"result": {result}, "count": {count}' + "}"
 
-    @staticmethod
-    async def search(pool: asyncpg.pool.Pool, query: str, allowed_langs: List[str],
-                     limit: int, page: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
+    @classmethod
+    async def search(cls, query: str, allowed_langs: List[str], limit: int, page: int):
+        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
             count = (await conn.fetch(Requests.author_search_count, query, allowed_langs))[0]["count"]
             if count == 0:
                 return None
@@ -166,17 +176,17 @@ class AuthorsBD:
                                        limit, limit * (page - 1)))[0]["array_to_json"]
             return "{" + f'"result": {result}, "count": {count}' + "}"
 
-    @staticmethod
-    async def random(pool: asyncpg.pool.Pool, allowed_langs: List[str]):
-        async with pool.acquire() as conn:
+    @classmethod
+    async def random(cls, allowed_langs: List[str]):
+        async with cls.pool.acquire() as conn:
             author_id = (await conn.fetch(Requests.author_random_id, allowed_langs))[0]["id"]
             return (await conn.fetch(Requests.author_info_by_id, author_id))[0]["json_build_object"]
 
 
-class SequenceName:
-    @staticmethod
-    async def by_id(pool: asyncpg.pool.Pool, allowed_langs, seq_id: int, limit: int, page: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
+class SequenceName(ConfigurableDB):
+    @classmethod
+    async def by_id(cls, allowed_langs, seq_id: int, limit: int, page: int):
+        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
             count = (await conn.fetch(Requests.sequencename_by_id_count, seq_id, allowed_langs))[0]["count"]
             if count == 0:
                 return None
@@ -184,9 +194,9 @@ class SequenceName:
                                        limit, limit * (page - 1)))[0]["json_build_object"]
             return "{" + f'"result": {result}, "count": {count}' + "}"
 
-    @staticmethod
-    async def search(pool: asyncpg.pool.Pool, allowed_langs, query: str, limit: int, page: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
+    @classmethod
+    async def search(cls, allowed_langs, query: str, limit: int, page: int):
+        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
             count = (await conn.fetch(Requests.sequencename_search_count, query, allowed_langs))[0]["count"]
             if count == 0:
                 return None
@@ -194,31 +204,31 @@ class SequenceName:
                                        limit, limit * (page - 1)))[0]["array_to_json"]
             return "{" + f'"result": {result}, "count": {count}' + "}"
 
-    @staticmethod
-    async def random(pool: asyncpg.pool.Pool, allowed_langs: List[str]):
-        async with pool.acquire() as conn:
+    @classmethod
+    async def random(cls, allowed_langs: List[str]):
+        async with cls.pool.acquire() as conn:
             return (await conn.fetch(Requests.sequencename_random, allowed_langs))[0]["json_build_object"]
 
 
-class Sequence:
-    @staticmethod
-    async def by_book_id(pool: asyncpg.pool.Pool, book_id: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
+class Sequence(ConfigurableDB):
+    @classmethod
+    async def by_book_id(cls, book_id: int):
+        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
             result = (await conn.fetch(Requests.sequence_by_book_id, book_id))[0]
             return result["array_agg"] if result["array_agg"] else []
 
 
-class BookAnnotations:
-    @staticmethod
-    async def by_id(pool: asyncpg.pool.Pool, book_id: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
+class BookAnnotations(ConfigurableDB):
+    @classmethod
+    async def by_id(cls, book_id: int):
+        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
             result = (await conn.fetch(Requests.book_annotations_by_id, book_id))
             return result[0]["json_build_object"] if result else None
 
 
-class AuthorAnnotations:
-    @staticmethod
-    async def by_id(pool: asyncpg.pool.Pool, author_id: int):
-        async with pool.acquire() as conn:  # type: asyncpg.Connection
+class AuthorAnnotations(ConfigurableDB):
+    @classmethod
+    async def by_id(cls, author_id: int):
+        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
             result = (await conn.fetch(Requests.author_annotations_by_id, author_id))
             return result[0]["json_build_object"] if result else None

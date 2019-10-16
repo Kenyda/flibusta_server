@@ -144,7 +144,7 @@ class BookHandler:
         id_ = request.match_info.get("id", None)
         if id_ is None:
             raise web.HTTPBadRequest
-        response = await BooksDB.by_id(app["pool"], int(id_))
+        response = await BooksDB.by_id(int(id_))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -157,7 +157,7 @@ class BookHandler:
         page = request.match_info.get("page", None)
         if None in [query, allowed_langs, limit, page]:
             raise web.HTTPBadRequest
-        response = await BooksDB.search(app["pool"], query, json.loads(allowed_langs),
+        response = await BooksDB.search(query, json.loads(allowed_langs),
                                         int(limit), int(page))
         if not response:
             raise web.HTTPNoContent
@@ -168,7 +168,7 @@ class BookHandler:
         allowed_langs = request.match_info.get("allowed_langs", None)
         if not allowed_langs:
             raise web.HTTPBadRequest
-        response = await BooksDB.random(app["pool"], json.loads(allowed_langs))
+        response = await BooksDB.random(json.loads(allowed_langs))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -181,7 +181,7 @@ class BookHandler:
         if book_id is None and file_type is None:
             raise web.HTTPBadRequest
 
-        book = json.loads(await BooksDB.by_id(app["pool"], int(book_id)))
+        book = json.loads(await BooksDB.by_id(int(book_id)))
 
         if not book:
             raise web.HTTPNoContent
@@ -205,7 +205,7 @@ class AuthorHandler:
         page = request.match_info.get("page", None)
         if None in [id_, allowed_langs, limit, page]:
             raise web.HTTPBadRequest
-        response = await AuthorsBD.by_id(app['pool'], int(id_), json.loads(allowed_langs), int(limit), int(page))
+        response = await AuthorsBD.by_id(int(id_), json.loads(allowed_langs), int(limit), int(page))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -218,7 +218,7 @@ class AuthorHandler:
         page = request.match_info.get("page", None)
         if None in [query, allowed_langs, limit, page]:
             raise web.HTTPBadRequest
-        response = await AuthorsBD.search(app["pool"], query, json.loads(allowed_langs),
+        response = await AuthorsBD.search(query, json.loads(allowed_langs),
                                           int(limit), int(page))
         if not response:
             raise web.HTTPNoContent
@@ -229,7 +229,7 @@ class AuthorHandler:
         allowed_langs = request.match_info.get("allowed_langs", None)
         if allowed_langs is None:
             raise web.HTTPBadRequest
-        response = await AuthorsBD.random(app["pool"], json.loads(allowed_langs))
+        response = await AuthorsBD.random(json.loads(allowed_langs))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -244,7 +244,7 @@ class SequenceHandler:
         page = request.match_info.get("page", None)
         if None in [id_, allowed_langs, limit, page]:
             raise web.HTTPBadRequest
-        response = await SequenceName.by_id(app["pool"], json.loads(allowed_langs), int(id_), int(limit), int(page))
+        response = await SequenceName.by_id(json.loads(allowed_langs), int(id_), int(limit), int(page))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -257,7 +257,7 @@ class SequenceHandler:
         page = request.match_info.get("page", None)
         if None in [query, allowed_langs, limit, page]:
             raise web.HTTPBadRequest
-        response = await SequenceName.search(app["pool"], json.loads(allowed_langs), query, int(limit), int(page))
+        response = await SequenceName.search(json.loads(allowed_langs), query, int(limit), int(page))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -267,7 +267,7 @@ class SequenceHandler:
         allowed_langs = request.match_info.get("allowed_langs", None)
         if allowed_langs is None:
             raise web.HTTPBadRequest
-        response = await SequenceName.random(app["pool"], json.loads(allowed_langs))
+        response = await SequenceName.random(json.loads(allowed_langs))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -279,7 +279,7 @@ class BookAnnotationHandler:
         id_ = request.match_info.get("id", None)
         if id_ is None:
             raise web.HTTPBadRequest
-        response = await BookAnnotations.by_id(app["pool"], int(id_))
+        response = await BookAnnotations.by_id(int(id_))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -289,7 +289,7 @@ class BookAnnotationHandler:
         id_ = request.match_info.get("id", None)
         if id_ is None:
             raise web.HTTBadRequest
-        response = await BookAnnotations.by_id(app["pool"], int(id_))
+        response = await BookAnnotations.by_id(int(id_))
         if not response:
             raise web.HTTPNoContent
         path = json.loads(response)['file']
@@ -309,7 +309,7 @@ class AuthorAnnotationHandler:
         id_ = request.match_info.get("id", None)
         if id_ is None:
             raise web.HTTPBadRequest
-        response = await AuthorAnnotations.by_id(app["pool"], int(id_))
+        response = await AuthorAnnotations.by_id(int(id_))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -319,7 +319,7 @@ class AuthorAnnotationHandler:
         id_ = request.match_info.get("id", None)
         if id_ is None:
             raise web.HTTBadRequest
-        response = await AuthorAnnotations.by_id(app["pool"], int(id_))
+        response = await AuthorAnnotations.by_id(int(id_))
         if not response:
             raise web.HTTPNoContent
         path = json.loads(response)['file']
@@ -349,7 +349,7 @@ if __name__ == "__main__":
     app = web.Application()
     # update.app = app
 
-    app.on_startup.append(create_pool)
+    app.on_startup.append(preapare_db)
 
     app.add_routes((
         web.get("/book/{id}", BookHandler.by_id),
