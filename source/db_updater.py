@@ -205,8 +205,13 @@ async def update_authors(mysql_pool, postgres_pool):
         "INSERT INTO author (id, first_name, middle_name, last_name, search_content) VALUES ($1, $2, $3, $4, to_tsvector($5)) "
         "ON CONFLICT (id) DO UPDATE SET first_name = EXCLUDED.first_name, middle_name = EXCLUDED.middle_name, last_name = EXCLUDED.last_name, search_content = EXCLUDED.search_content",
         [(
-            r[0], remove_dots(remove_wrong_ch(r[1])), remove_dots(remove_wrong_ch(r[2])), remove_dots(remove_wrong_ch(r[3])), 
-            " ".join([remove_dots(remove_wrong_ch(r[1])), remove_dots(remove_wrong_ch(r[2])), remove_dots(remove_wrong_ch(r[3]))])) for r in result]
+            r[0], remove_dots(remove_wrong_ch(r[1])), 
+            remove_dots(remove_wrong_ch(r[2])), 
+            remove_dots(remove_wrong_ch(r[3])), 
+            " ".join([remove_dots(remove_wrong_ch(r[1])), 
+                      remove_dots(remove_wrong_ch(r[2])), 
+                      remove_dots(remove_wrong_ch(r[3]))])) 
+                      for r in result]
     )
     print("Authors updated!")
 

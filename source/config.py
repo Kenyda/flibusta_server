@@ -26,7 +26,7 @@ class Config:
                  db_user: str = "flibusta",
                  temp_db_name = "temp", temp_db_host = "localhost",
                  temp_db_user = "root",
-                 server_host: str = "0.0.0.0", server_port: int = 7770,
+                 server_host: str = "localhost", server_port: int = 7770,
                  tor_proxies: str = "http://localhost:8118"):
         Config.SERVER_HOST = server_host
         Config.SERVER_PORT = server_port

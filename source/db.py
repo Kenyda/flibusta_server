@@ -1,10 +1,9 @@
 from typing import List, Optional, Type
 import pathlib
-from abc import abstractclassmethod, ABC
+from abc import ABC
 
 import asyncpg
 from aiohttp import web
-from asyncpg import Record
 
 from config import Config as config
 

@@ -1,16 +1,8 @@
-import io
 import ujson as json
 
-import aiohttp
 import asyncio
-import concurrent.futures
-
-
-from aioify import aioify
-
 from aiohttp.web_response import json_response
 
-from config import Config
 from db import *
 from exceptions import *
 from utils import get_filename, download, download_image
