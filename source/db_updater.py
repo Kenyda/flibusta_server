@@ -208,10 +208,7 @@ async def update_authors(mysql_pool, postgres_pool):
             r[0], remove_dots(remove_wrong_ch(r[1])), 
             remove_dots(remove_wrong_ch(r[2])), 
             remove_dots(remove_wrong_ch(r[3])), 
-            " ".join([remove_dots(remove_wrong_ch(r[1])), 
-                      remove_dots(remove_wrong_ch(r[2])), 
-                      remove_dots(remove_wrong_ch(r[3]))])) 
-                      for r in result]
+            " ".join([remove_dots(remove_wrong_ch(r[1])), remove_dots(remove_wrong_ch(r[2])), remove_dots(remove_wrong_ch(r[3]))])) for r in result]
     )
     print("Authors updated!")
 
@@ -465,9 +462,7 @@ async def main():
     pool.close()
     await pool.wait_closed()
 
-    await asyncio.gather(
-        *[processing_file(file_) for file_ in files]
-    )
+    await asyncio.gather(*[processing_file(file_) for file_ in files])
 
     mysql_pool = await aiomysql.create_pool(
         host=Config.TEMP_DB_HOST,
