@@ -158,7 +158,7 @@ class BookAnnotationHandler:
     async def image(request: web.Request):
         id_ = request.match_info.get("id", None)
         if id_ is None:
-            raise web.HTTBadRequest
+            raise web.HTTPBadRequest
         response = await BookAnnotations.by_id(int(id_))
         if not response:
             raise web.HTTPNoContent
@@ -188,7 +188,7 @@ class AuthorAnnotationHandler:
     async def image(request: web.Request):
         id_ = request.match_info.get("id", None)
         if id_ is None:
-            raise web.HTTBadRequest
+            raise web.HTTPBadRequest
         response = await AuthorAnnotations.by_id(int(id_))
         if not response:
             raise web.HTTPNoContent
