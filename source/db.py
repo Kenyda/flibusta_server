@@ -40,49 +40,14 @@ class TablesCreator(ConfigurableDB):
     CREATE_AUTHOR_ANNOTATION_TABLE = open(SQL_FOLDER / "create_author_annotation_table.sql").read().format(config.DB_USER)
 
     @classmethod
-    async def __create_book_table(cls):
-        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(cls.CREATE_BOOK_TABLE)
-
-    @classmethod
-    async def __create_author_table(cls):
-        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(cls.CREATE_AUTHOR_TABLE)
-
-    @classmethod
-    async def __create_book_author_table(cls):
-        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(cls.CREATE_BOOK_AUTHOR_TABLE)
-
-    @classmethod
-    async def __create_sequence_name_table(cls):
-        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(cls.CREATE_SEQUENCE_NAME_TABLE)
-
-    @classmethod
-    async def __create_sequence_table(cls):
-        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(cls.CREATE_SEQUENCE_TABLE)
-
-    @classmethod
-    async def __create_book_annotation_table(cls):
-        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(cls.CREATE_BOOK_ANNOTATION_TABLE)
-
-    @classmethod
-    async def __create_author_annotation_table(cls):
-        async with cls.pool.acquire() as conn:  # type: asyncpg.Connection
-            await conn.execute(cls.CREATE_AUTHOR_ANNOTATION_TABLE)
-
-    @classmethod
     async def create_tables(cls):
-        await cls.__create_book_table()
-        await cls.__create_author_table()
-        await cls.__create_book_author_table()
-        await cls.__create_sequence_name_table()
-        await cls.__create_sequence_table()
-        await cls.__create_book_annotation_table()
-        await cls.__create_author_annotation_table()
+        await cls.pool.execute(cls.CREATE_BOOK_TABLE)
+        await cls.pool.execute(cls.CREATE_AUTHOR_TABLE)
+        await cls.pool.execute(cls.CREATE_BOOK_AUTHOR_TABLE)
+        await cls.pool.execute(cls.CREATE_SEQUENCE_NAME_TABLE)
+        await cls.pool.execute(cls.CREATE_SEQUENCE_TABLE)
+        await cls.pool.execute(cls.CREATE_BOOK_ANNOTATION_TABLE)
+        await cls.pool.execute(cls.CREATE_AUTHOR_ANNOTATION_TABLE)
 
 
 class BooksDB(ConfigurableDB):
