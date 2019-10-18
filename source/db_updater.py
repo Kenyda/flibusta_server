@@ -191,6 +191,8 @@ async def update_books(mysql_pool, postgres_pool):
     books_updated = True
     await update_book_annotations(mysql_pool, postgres_pool)
 
+    await postgres_pool.execute("REINDEX TABLE book;")
+
 
 async def update_authors(mysql_pool, postgres_pool):
     print("Getting authors...")
@@ -216,6 +218,8 @@ async def update_authors(mysql_pool, postgres_pool):
     authors_updated = True
     await update_author_annotations(mysql_pool, postgres_pool)
 
+    await postgres_pool.execute("REINDEX TABLE author;")
+
 
 async def update_book_author(mysql_pool, postgres_pool):
     while not books_updated or not authors_updated:
@@ -235,6 +239,8 @@ async def update_book_author(mysql_pool, postgres_pool):
         [(r[0], r[1]) for r in result]
     )
     print("Book authors updated!")
+
+    await postgres_pool.execute("REINDEX TABLE bookauthor;")
 
 
 async def update_sequence(mysql_pool, postgres_pool):
@@ -256,6 +262,8 @@ async def update_sequence(mysql_pool, postgres_pool):
     )
     print("Sequence updated!")
 
+    await postgres_pool.execute("REINDEX TABLE seq;")
+
 async def update_sequence_names(mysql_pool, postgres_pool):
     print("Getting sequence names...")
     async with mysql_pool.acquire() as conn:
@@ -275,6 +283,8 @@ async def update_sequence_names(mysql_pool, postgres_pool):
     global sequences_updated
     sequences_updated = True
 
+    await postgres_pool.execute("REINDEX TABLE seqname;")
+
 
 async def update_book_annotations(mysql_pool, postgres_pool):
     print("Getting book annotations...")
@@ -293,6 +303,8 @@ async def update_book_annotations(mysql_pool, postgres_pool):
     print("Book annotations updated!")
 
     await update_book_annotations_pics(mysql_pool, postgres_pool)
+
+    await postgres_pool.execute("REINDEX TABLE book_annotation;")
 
 
 async def update_book_annotations_pics(mysql_pool, postgres_pool):
@@ -328,6 +340,8 @@ async def update_author_annotations(mysql_pool, postgres_pool):
     print("Author annotations updated!")
 
     await update_author_annotations_pics(mysql_pool, postgres_pool)
+
+    await postgres_pool.execute("REINDEX TABLE author_annotation;")
 
 
 async def update_author_annotations_pics(mysql_pool, postgres_pool):
