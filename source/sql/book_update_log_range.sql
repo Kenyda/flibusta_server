@@ -1,5 +1,5 @@
 WITH updated_books AS (
-    SELECT * FROM book WHERE lang = ANY($1::text[]) AND uploaded = $2
+    SELECT * FROM book WHERE lang = ANY($1::text[]) AND uploaded >= $2 AND uploaded <= $3
 )
 SELECT json_build_object(
     'count', ( SELECT count(*) FROM updated_books ),
@@ -20,5 +20,5 @@ SELECT json_build_object(
                     WHERE ba.book_id = book.id))
             FROM updated_books as book
             ORDER BY book.id
-            LIMIT $3 OFFSET $4) j)
+            LIMIT $4 OFFSET $5) j)
 ) as json;

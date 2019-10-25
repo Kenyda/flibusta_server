@@ -67,27 +67,26 @@ class BookHandler:
         return response
 
     @staticmethod
-    async def update_log(request: web.Request):
-        request_date = request.match_info.get("date", None)
+    async def update_log_range(request: web.Request):
+        request_start_date = request.match_info.get("start_date", None)
+        request_end_date = request.match_info.get("end_date", None)
         allowed_langs = request.match_info.get("allowed_langs", None)
         limit = request.match_info.get("limit", None)
         page = request.match_info.get("page", None)
-        if None in [request_date, allowed_langs, limit, page]:
+        if None in [request_start_date, request_end_date, allowed_langs, limit, page]:
             raise web.HTTPBadRequest
 
         try:
-            request_date = date.fromisoformat(request_date)
+            request_start_date = date.fromisoformat(request_start_date)
+            request_end_date = date.fromisoformat(request_end_date)
         except ValueError:
             raise web.HTTPBadRequest
 
-        response = await BooksDB.update_log(request_date, json.loads(allowed_langs), int(limit), int(page))
+        response = await BooksDB.update_log_range(request_start_date, request_end_date, 
+                                                  json.loads(allowed_langs), int(limit), int(page))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response.encode())
-
-    @staticmethod
-    async def update_log_range(request: web.Request):
-        pass  # TODO
 
 
 class AuthorHandler:
@@ -244,7 +243,6 @@ if __name__ == "__main__":
         web.get("/book/search/{allowed_langs}/{limit}/{page}/{query}", BookHandler.search),
         web.get("/book/download/{id}/{type}", BookHandler.download),
         web.get("/book/random/{allowed_langs}", BookHandler.random),
-        web.get("/book/update_log/{date}/{allowed_langs}/{limit}/{page}", BookHandler.update_log),
         web.get("/book/update_log_range/{start_date}/{end_date}/{allowed_langs}/{limit}/{page}", 
                 BookHandler.update_log_range),
         web.get("/author/search/{allowed_langs}/{limit}/{page}/{query}", AuthorHandler.search),

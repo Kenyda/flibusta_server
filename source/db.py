@@ -60,6 +60,7 @@ class BooksDB(ConfigurableDB):
     BOOK_SEARCH = open(SQL_FOLDER / "book_search.sql").read()
     BOOK_RANDOM = open(SQL_FOLDER / "book_random.sql").read()
     BOOK_UPDATE_LOG = open(SQL_FOLDER / "book_update_log.sql").read()
+    BOOK_UPDATE_LOG_RANGE = open(SQL_FOLDER / "book_update_log_range.sql").read()
 
     @classmethod
     async def by_id(cls, book_id: int):
@@ -74,11 +75,11 @@ class BooksDB(ConfigurableDB):
     @classmethod
     async def random(cls, allowed_langs: List[str]):
         return (await cls.pool.fetch(cls.BOOK_RANDOM, allowed_langs))[0]["json"]
-    
+
     @classmethod
-    async def update_log(cls, request_date: date, allowed_langs: List[str], limit: int, page: int) -> str:
-        return (await cls.pool.fetch(cls.BOOK_UPDATE_LOG, allowed_langs, request_date, limit, 
-                                     limit * (page - 1)))[0]["json"]
+    async def update_log_range(cls, start_date: date, end_date: date, allowed_langs: List[str], limit: int, page: int) -> str:
+        return (await cls.pool.fetch(cls.BOOK_UPDATE_LOG_RANGE, allowed_langs, start_date, end_date,
+                                     limit, limit * (page - 1)))[0]["json"]
 
 
 class AuthorsBD(ConfigurableDB):
