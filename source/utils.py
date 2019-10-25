@@ -12,7 +12,7 @@ from config import Config
 from exceptions import *
 
 
-process_pool_executor = concurrent.futures.ProcessPoolExecutor(10)
+process_pool_executor = concurrent.futures.ProcessPoolExecutor(2)
 
 
 def get_short_name(author) -> str:
