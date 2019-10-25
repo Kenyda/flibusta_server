@@ -2,8 +2,6 @@ import fire
 
 
 class Config:
-    DEBUG = False
-
     SERVER_HOST: str
     SERVER_PORT: int
 
@@ -21,29 +19,30 @@ class Config:
 
     TOR_PROXIES: str
 
-    def __init__(self, db_password: str, temp_db_password: str,
-                 db_name: str = "flibusta", db_host: str = "localhost",
-                 db_user: str = "flibusta",
-                 temp_db_name = "temp", temp_db_host = "localhost",
-                 temp_db_user = "root",
-                 server_host: str = "localhost", server_port: int = 7770,
-                 tor_proxies: str = "http://localhost:8118"):
-        Config.SERVER_HOST = server_host
-        Config.SERVER_PORT = server_port
+    @classmethod
+    def configure(cls, db_password: str, temp_db_password: str,
+                  db_name: str = "flibusta", db_host: str = "localhost",
+                  db_user: str = "flibusta",
+                  temp_db_name = "temp", temp_db_host = "localhost",
+                  temp_db_user = "root",
+                  server_host: str = "localhost", server_port: int = 7770,
+                  tor_proxies: str = "http://localhost:8118"):
+        cls.SERVER_HOST = server_host
+        cls.SERVER_PORT = server_port
 
-        Config.DB_NAME = db_name
-        Config.DB_HOST = db_host
-        Config.DB_USER = db_user
-        Config.DB_PASSWORD = db_password
+        cls.DB_NAME = db_name
+        cls.DB_HOST = db_host
+        cls.DB_USER = db_user
+        cls.DB_PASSWORD = db_password
 
-        Config.TEMP_DB_NAME = temp_db_name
-        Config.TEMP_DB_HOST = temp_db_host
-        Config.TEMP_DB_USER = temp_db_user
-        Config.TEMP_DB_PASSWORD = str(temp_db_password)
+        cls.TEMP_DB_NAME = temp_db_name
+        cls.TEMP_DB_HOST = temp_db_host
+        cls.TEMP_DB_USER = temp_db_user
+        cls.TEMP_DB_PASSWORD = str(temp_db_password)
 
-        Config.DSN = f"postgresql://{self.DB_HOST}:5432/{self.DB_USER}"
+        cls.DSN = f"postgresql://{cls.DB_HOST}:5432/{cls.DB_USER}"
 
-        Config.TOR_PROXIES = tor_proxies
+        cls.TOR_PROXIES = tor_proxies
 
 
-fire.Fire(Config)
+fire.Fire(Config.configure)
