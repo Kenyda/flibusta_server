@@ -1,4 +1,16 @@
-SELECT array_to_json(array_agg(j.json_build_object))
+WITH filtered_authors AS (
+  SELECT *
+  FROM author, plainto_tsquery($1) f_query
+  WHERE EXISTS (SELECT *
+    FROM bookauthor
+            RIGHT JOIN book ON bookauthor.book_id = book.id
+    WHERE book.lang = ANY ($2::text[])
+      AND bookauthor.author_id = author.id) AND author.search_content @@ f_query
+)
+SELECT json_build_object(
+  'count', (SELECT COUNT(*) FROM filtered_authors),
+  'result', array_to_json(array_agg(j.json_build_object))
+) as json
 FROM (
        select json_build_object(
                   'id', author.id,
@@ -9,14 +21,8 @@ FROM (
                     SELECT * FROM author_annotation WHERE author_annotation.author_id = author.id
                   )
        )
-       from author
-       where author.search_content @@ plainto_tsquery($1)
-         and (select count(*)
-              from bookauthor
-                     right join book on bookauthor.book_id = book.id
-              where book.lang = ANY ($2::text[])
-                and bookauthor.author_id = author.id) <> 0
-       order by ts_rank(author.search_content, plainto_tsquery($1)) DESC,
+       from filtered_authors as author, plainto_tsquery($1) s_query
+       order by ts_rank(author.search_content, s_query) DESC,
                 (select count(*)
                  from bookauthor
                  where bookauthor.author_id = author.id) DESC, author.id

@@ -1,4 +1,5 @@
 import ujson as json
+from datetime import date
 
 import asyncio
 from aiohttp.web_response import json_response
@@ -31,7 +32,7 @@ class BookHandler:
                                         int(limit), int(page))
         if not response:
             raise web.HTTPNoContent
-        return json_response(body=response)
+        return json_response(body=response.encode())
 
     @staticmethod
     async def random(request: web.Request):
@@ -65,6 +66,29 @@ class BookHandler:
                              f"attachment; filename={filename}")
         return response
 
+    @staticmethod
+    async def update_log(request: web.Request):
+        request_date = request.match_info.get("date", None)
+        allowed_langs = request.match_info.get("allowed_langs", None)
+        limit = request.match_info.get("limit", None)
+        page = request.match_info.get("page", None)
+        if None in [request_date, allowed_langs, limit, page]:
+            raise web.HTTPBadRequest
+
+        try:
+            request_date = date.fromisoformat(request_date)
+        except ValueError:
+            raise web.HTTPBadRequest
+
+        response = await BooksDB.update_log(request_date, json.loads(allowed_langs), int(limit), int(page))
+        if not response:
+            raise web.HTTPNoContent
+        return json_response(body=response.encode())
+
+    @staticmethod
+    async def update_log_range(request: web.Request):
+        pass  # TODO
+
 
 class AuthorHandler:
     @staticmethod
@@ -76,8 +100,6 @@ class AuthorHandler:
         if None in [id_, allowed_langs, limit, page]:
             raise web.HTTPBadRequest
         response = await AuthorsBD.by_id(int(id_), json.loads(allowed_langs), int(limit), int(page))
-        if not response:
-            raise web.HTTPNoContent
         return json_response(body=response)
 
     @staticmethod
@@ -90,9 +112,7 @@ class AuthorHandler:
             raise web.HTTPBadRequest
         response = await AuthorsBD.search(query, json.loads(allowed_langs),
                                           int(limit), int(page))
-        if not response:
-            raise web.HTTPNoContent
-        return json_response(body=response)
+        return json_response(body=response.encode())
 
     @staticmethod
     async def random(request: web.Request):
@@ -114,10 +134,10 @@ class SequenceHandler:
         page = request.match_info.get("page", None)
         if None in [id_, allowed_langs, limit, page]:
             raise web.HTTPBadRequest
-        response = await SequenceName.by_id(json.loads(allowed_langs), int(id_), int(limit), int(page))
+        response = await SequenceNameBD.by_id(json.loads(allowed_langs), int(id_), int(limit), int(page))
         if not response:
             raise web.HTTPNoContent
-        return json_response(body=response)
+        return json_response(body=response.encode())
 
     @staticmethod
     async def search(request: web.Request):
@@ -127,7 +147,7 @@ class SequenceHandler:
         page = request.match_info.get("page", None)
         if None in [query, allowed_langs, limit, page]:
             raise web.HTTPBadRequest
-        response = await SequenceName.search(json.loads(allowed_langs), query, int(limit), int(page))
+        response = await SequenceNameBD.search(json.loads(allowed_langs), query, int(limit), int(page))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -137,7 +157,7 @@ class SequenceHandler:
         allowed_langs = request.match_info.get("allowed_langs", None)
         if allowed_langs is None:
             raise web.HTTPBadRequest
-        response = await SequenceName.random(json.loads(allowed_langs))
+        response = await SequenceNameBD.random(json.loads(allowed_langs))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -149,7 +169,7 @@ class BookAnnotationHandler:
         id_ = request.match_info.get("id", None)
         if id_ is None:
             raise web.HTTPBadRequest
-        response = await BookAnnotations.by_id(int(id_))
+        response = await BookAnnotationsBD.by_id(int(id_))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -159,7 +179,7 @@ class BookAnnotationHandler:
         id_ = request.match_info.get("id", None)
         if id_ is None:
             raise web.HTTPBadRequest
-        response = await BookAnnotations.by_id(int(id_))
+        response = await BookAnnotationsBD.by_id(int(id_))
         if not response:
             raise web.HTTPNoContent
         path = json.loads(response)['file']
@@ -179,7 +199,7 @@ class AuthorAnnotationHandler:
         id_ = request.match_info.get("id", None)
         if id_ is None:
             raise web.HTTPBadRequest
-        response = await AuthorAnnotations.by_id(int(id_))
+        response = await AuthorAnnotationsBD.by_id(int(id_))
         if not response:
             raise web.HTTPNoContent
         return json_response(body=response)
@@ -189,7 +209,7 @@ class AuthorAnnotationHandler:
         id_ = request.match_info.get("id", None)
         if id_ is None:
             raise web.HTTPBadRequest
-        response = await AuthorAnnotations.by_id(int(id_))
+        response = await AuthorAnnotationsBD.by_id(int(id_))
         if not response:
             raise web.HTTPNoContent
         path = json.loads(response)['file']
@@ -224,6 +244,9 @@ if __name__ == "__main__":
         web.get("/book/search/{allowed_langs}/{limit}/{page}/{query}", BookHandler.search),
         web.get("/book/download/{id}/{type}", BookHandler.download),
         web.get("/book/random/{allowed_langs}", BookHandler.random),
+        web.get("/book/update_log/{date}/{allowed_langs}/{limit}/{page}", BookHandler.update_log),
+        web.get("/book/update_log_range/{start_date}/{end_date}/{allowed_langs}/{limit}/{page}", 
+                BookHandler.update_log_range),
         web.get("/author/search/{allowed_langs}/{limit}/{page}/{query}", AuthorHandler.search),
         web.get("/author/{id}/{allowed_langs}/{limit}/{page}", AuthorHandler.by_id),
         web.get("/author/random/{allowed_langs}", AuthorHandler.random),

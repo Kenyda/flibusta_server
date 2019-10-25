@@ -1,4 +1,11 @@
-SELECT array_to_json(array_agg(j.json_build_object))
+WITH filtered_books AS ( 
+  SELECT * FROM book, plainto_tsquery($2) f_query
+  WHERE lang = ANY ($1::text[]) AND book.search_content @@ f_query
+)
+SELECT json_build_object(
+    'count', ( SELECT COUNT(*) FROM filtered_books), 
+    'result', array_to_json(array_agg(j.json_build_object))
+) as json
 FROM (
        SELECT json_build_object(
                   'id', book.id,
@@ -13,9 +20,7 @@ FROM (
                     FROM (SELECT id, first_name, last_name, middle_name FROM author) author
                            LEFT JOIN bookauthor ba ON author.id = ba.author_id
                     WHERE ba.book_id = book.id))
-       FROM book
-       WHERE lang = ANY ($1::text[])
-         AND book.search_content @@ plainto_tsquery($2)
-       ORDER BY ts_rank_cd(book.search_content, plainto_tsquery($2)) DESC,
+       FROM filtered_books AS book, plainto_tsquery($2) s_query
+       ORDER BY ts_rank_cd(book.search_content, s_query) DESC,
                 LENGTH(book.title), book.title
        LIMIT $3 OFFSET $4) j

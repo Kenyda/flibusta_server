@@ -14,5 +14,5 @@ SELECT json_build_object(
                         LEFT JOIN bookauthor ba ON author.id = ba.author_id
                 WHERE ba.book_id = book.id) author
            )
-         )
+         ) as json
 FROM book WHERE lang = ANY($1::text[]) ORDER BY random() LIMIT 1;

@@ -1,4 +1,12 @@
-SELECT array_to_json(array_agg(j.json_build_object))
+WITH filtered_seqnames AS (
+       SELECT * FROM seqname, plainto_tsquery($1) f_query
+       WHERE EXISTS (SELECT * FROM seq INNER JOIN book b ON seq.book_id = b.id AND lang = ANY($2::text[]))
+              AND search_content @@ f_query
+)
+SELECT json_build_object(
+       'count', (SELECT COUNT(*) FROM filtered_seqnames), 
+       'result', array_to_json(array_agg(j.json_build_object))
+) as json
 FROM (SELECT json_build_object(
                  'id', seqname.seq_id,
                  'name', name,
@@ -17,10 +25,9 @@ FROM (SELECT json_build_object(
                                           inner join book b on seq.book_id = b.id
                                           inner join bookauthor b2 on b.id = b2.book_id and b2.author_id = a.id
                                    where seq.seq_id = seqname.seq_id) desc
-                         limit 6) author
+                         ) author
                  ))
-      FROM seqname
-      WHERE search_content @@ plainto_tsquery($1)
-      ORDER BY ts_rank_cd(search_content, plainto_tsquery($1)) DESC,
+      FROM filtered_seqnames as seqname, plainto_tsquery($1) s_query
+      ORDER BY ts_rank_cd(search_content, s_query) DESC,
                LENGTH(name) DESC, name
       LIMIT $3 OFFSET $4) j

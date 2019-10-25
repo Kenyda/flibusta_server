@@ -1,4 +1,11 @@
+WITH sequence_with_books AS (
+       SELECT * FROM book 
+       LEFT JOIN seq ON book.id = seq.book_id
+       WHERE seq.seq_id = $2 AND lang = ANY ($1::text[])
+)
 SELECT json_build_object(
+       'count', ( SELECT COUNT(*) FROM sequence_with_books ),
+       'result', json_build_object(
            'id', ss.seq_id,
            'name', ss.name,
            'books', (
@@ -17,11 +24,9 @@ SELECT json_build_object(
                                  FROM (SELECT id, first_name, last_name, middle_name FROM author) author
                                         LEFT JOIN bookauthor ba ON author.id = ba.author_id
                                  WHERE ba.book_id = book.id))
-                    FROM book
-                           LEFT JOIN seq ON book.id = seq.book_id
-                    WHERE seq.seq_id = $2
-                      AND lang = ANY ($1::text[])
-                    ORDER BY seq.num
+                    FROM sequence_with_books as book
+                    ORDER BY book.num
                     LIMIT $3 OFFSET $4) j))
+) as json
 FROM seqname ss
 WHERE seq_id = $2

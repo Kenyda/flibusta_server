@@ -16,7 +16,7 @@ SELECT json_build_object(
                                             inner join book b on seq.book_id = b.id
                                             inner join bookauthor b2 on b.id = b2.book_id and b2.author_id = a.id
                                    where seq.seq_id = seqname.seq_id) desc
-                         limit 6) author
+                         ) author
                ))
 FROM seqname
 WHERE (SELECT count(*) FROM seq INNER JOIN book b ON b.id = seq.book_id WHERE b.lang = ANY($1::text[])) <> 0

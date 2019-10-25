@@ -175,15 +175,15 @@ async def update_books(mysql_pool, postgres_pool):
     print("Getting books...")
     async with mysql_pool.acquire() as conn:
         async with conn.cursor() as cursor:
-            await cursor.execute("SELECT BookId, Title, Lang, FileType FROM temp.libbook;")
+            await cursor.execute("SELECT BookId, Title, Lang, FileType, Time FROM temp.libbook;")
             result = await cursor.fetchall()
     print("Books has get!")
 
     print("Update books...")
     await postgres_pool.executemany(
-        "INSERT INTO book (id, title, lang, file_type, search_content) VALUES ($1, cast($2 as varchar), $3, $4, to_tsvector($2)) "
-        "ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, lang = EXCLUDED.lang, file_type = EXCLUDED.file_type, search_content = EXCLUDED.search_content",
-        [(r[0], remove_wrong_ch(remove_dots(r[1])), remove_wrong_ch(remove_dots(r[2])), remove_wrong_ch(r[3])) for r in result]
+        "INSERT INTO book (id, title, lang, file_type, search_content, uploaded) VALUES ($1, cast($2 as varchar), $3, $4, to_tsvector($2), $5) "
+        "ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, lang = EXCLUDED.lang, file_type = EXCLUDED.file_type, search_content = EXCLUDED.search_content, uploaded = EXCLUDED.uploaded",
+        [(r[0], remove_wrong_ch(remove_dots(r[1])), remove_wrong_ch(remove_dots(r[2])), remove_wrong_ch(r[3]), r[4]) for r in result]
     )
     print("Books updated!")
 
@@ -506,4 +506,10 @@ async def main():
 
 if __name__ == "__main__":
     uvloop.install()
+
+    os.system("service mysql start")
+
     asyncio.run(main())
+
+    os.system("service mysql stop")
+

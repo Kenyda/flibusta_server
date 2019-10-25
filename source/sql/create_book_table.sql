@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS book
   title          VARCHAR(255) NOT NULL,
   lang           VARCHAR(2)   NOT NULL,
   file_type      VARCHAR(4)   NOT NULL,
+  uploaded       DATE         NOT NULL DEFAULT CURRENT_DATE,
   search_content tsvector     NOT NULL
 );
 ALTER TABLE book
