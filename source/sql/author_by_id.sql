@@ -5,7 +5,7 @@ WITH author_books AS (
 )
 SELECT json_build_object(
   'count', ( SELECT COUNT(*) FROM author_books ),
-  'result', json_build_object(
+  'result', (SELECT json_build_object(
               'id', author.id,
               'first_name', author.first_name,
               'last_name', author.last_name,
@@ -22,6 +22,5 @@ SELECT json_build_object(
                         FROM author_books as tbook
                         ORDER BY title
                         LIMIT $3 OFFSET $4) book))
-) as json
-FROM author
-WHERE author.id = $2
+ FROM author WHERE author.id = $2 )
+) as json;
