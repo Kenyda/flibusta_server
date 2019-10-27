@@ -59,7 +59,6 @@ class BooksDB(ConfigurableDB):
     BOOK_BY_ID = open(SQL_FOLDER / "book_by_id.sql").read()
     BOOK_SEARCH = open(SQL_FOLDER / "book_search.sql").read()
     BOOK_RANDOM = open(SQL_FOLDER / "book_random.sql").read()
-    BOOK_UPDATE_LOG = open(SQL_FOLDER / "book_update_log.sql").read()
     BOOK_UPDATE_LOG_RANGE = open(SQL_FOLDER / "book_update_log_range.sql").read()
 
     @classmethod
