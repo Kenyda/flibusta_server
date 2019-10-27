@@ -4,9 +4,8 @@ WITH filtered_books AS (
 )
 SELECT json_build_object(
     'count', ( SELECT COUNT(*) FROM filtered_books), 
-    'result', array_to_json(array_agg(j.json_build_object))
-) as json
-FROM (
+    'result', ( SELECT array_to_json(array_agg(j.json_build_object))
+      FROM (
        SELECT json_build_object(
                   'id', book.id,
                   'title', book.title,
@@ -24,3 +23,5 @@ FROM (
        ORDER BY ts_rank_cd(book.search_content, s_query) DESC,
                 LENGTH(book.title), book.title
        LIMIT $3 OFFSET $4) j
+    )
+) as json;

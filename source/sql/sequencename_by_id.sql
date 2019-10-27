@@ -5,7 +5,7 @@ WITH sequence_with_books AS (
 )
 SELECT json_build_object(
        'count', ( SELECT COUNT(*) FROM sequence_with_books ),
-       'result', json_build_object(
+       'result', ( SELECT json_build_object(
            'id', ss.seq_id,
            'name', ss.name,
            'books', (
@@ -27,6 +27,5 @@ SELECT json_build_object(
                     FROM sequence_with_books as book
                     ORDER BY book.num
                     LIMIT $3 OFFSET $4) j))
-) as json
-FROM seqname ss
-WHERE seq_id = $2
+              FROM seqname ss WHERE seq_id = $2 )
+) as json;

@@ -5,9 +5,8 @@ WITH filtered_seqnames AS (
 )
 SELECT json_build_object(
        'count', (SELECT COUNT(*) FROM filtered_seqnames), 
-       'result', array_to_json(array_agg(j.json_build_object))
-) as json
-FROM (SELECT json_build_object(
+       'result', (SELECT array_to_json(array_agg(j.json_build_object))
+              FROM (SELECT json_build_object(
                  'id', seqname.seq_id,
                  'name', name,
                  'authors', (
@@ -27,7 +26,9 @@ FROM (SELECT json_build_object(
                                    where seq.seq_id = seqname.seq_id) desc
                          ) author
                  ))
-      FROM filtered_seqnames as seqname, plainto_tsquery($1) s_query
-      ORDER BY ts_rank_cd(search_content, s_query) DESC,
-               LENGTH(name) DESC, name
-      LIMIT $3 OFFSET $4) j
+              FROM filtered_seqnames as seqname, plainto_tsquery($1) s_query
+              ORDER BY ts_rank_cd(search_content, s_query) DESC,
+                            LENGTH(name) DESC, name
+              LIMIT $3 OFFSET $4) j
+       )
+) as json;
